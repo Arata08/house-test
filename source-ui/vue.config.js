@@ -8,7 +8,7 @@ function resolve(dir) {
 const CompressionPlugin = require("compression-webpack-plugin");
 
 const name =
-  process.env.VUE_APP_TITLE || "丽丽租好房有限公司"; // 网页标题
+  process.env.VUE_APP_TITLE || "开源字节 | 追求极致用户体验的快速开发平台"; // 网页标题
 
 const port = process.env.port || process.env.npm_config_port || 8080; // 端口
 

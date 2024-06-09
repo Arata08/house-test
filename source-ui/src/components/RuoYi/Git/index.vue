@@ -9,7 +9,7 @@ export default {
   name: "SourceGit",
   data() {
     return {
-      url: "https://gitee.com/cx293824/lili-ui.git",
+      url: "https://gitee.com/open-source-byte/source-vue",
     };
   },
   methods: {
