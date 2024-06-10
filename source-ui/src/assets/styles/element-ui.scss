@@ -120,3 +120,19 @@ el-table .el-table__cell {
 .el-dialog__body {
   padding: 20px 20px;
 }
+
+.el-input--mini .el-input__icon {
+  line-height: 32px;
+}
+
+/* 用来设置当前页面element全局table 选中某行时的背景色*/
+.el-table__body tr.current-row > td {
+  color: #2d3a4b;
+  background-color: #fbec88 !important;
+  font-weight: 600;
+}
+/* 用来设置当前页面element全局table 鼠标移入某行时的背景色*/
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: rgba(#fbec88, 0.6) !important;
+  color: #2d3a4b;
+}

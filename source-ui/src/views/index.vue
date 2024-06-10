@@ -3,9 +3,7 @@
     <el-alert
       title="思创OA"
       type="info"
-      description="思创OA | 新一代智慧OA租赁服务管理平台，融合了服务管理的流程化概念和产品进销存管理的人财物理念。
-      集进销存、租赁、抄表、结算、应收应付、发票、设备资产、报修，耗材等为一体，为企业全面管理提供系统支撑。
-      欢迎试用体验，体验地址：https://oa.sourcebyte.vip"
+      description="公告"
       style="line-height: 1.5"
       :closable="false"
       show-icon

@@ -7,7 +7,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:article:add']"
+          v-hasPermi="['system:developer:add']"
           >新增</el-button
         >
       </el-col>
@@ -18,7 +18,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:article:edit']"
+          v-hasPermi="['system:developer:edit']"
           >修改</el-button
         >
       </el-col>
@@ -29,54 +29,31 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:article:remove']"
+          v-hasPermi="['system:developer:remove']"
           >删除</el-button
         >
       </el-col>
-      <!-- <el-col :span="1.5">
-        <el-button
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:article:export']"
-          >导出</el-button
-        >
-      </el-col> -->
       <el-form
         :model="queryParams"
         ref="queryForm"
         :inline="true"
-        label-width="68px"
+        v-show="showSearch"
+        label-width="40px"
         class="el-form-search"
       >
-        <el-form-item
-          label="类型"
-          prop="articleType"
-          class="el-form-search-item"
-        >
-          <el-select
-            v-model="queryParams.articleType"
-            placeholder="请选择类型"
+        <el-form-item label="名称" prop="name" class="el-form-search-item">
+          <el-input
+            v-model="queryParams.name"
+            placeholder="请输入名称"
             clearable
             size="mini"
-          >
-            <el-option
-              v-for="dict in dict.type.sys_article_type"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            />
-          </el-select>
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item
-          label="标题"
-          prop="smallTitle"
-          class="el-form-search-item"
-        >
+        <el-form-item label="职业" prop="career" class="el-form-search-item">
           <el-input
-            v-model="queryParams.smallTitle"
-            placeholder="请输入标题"
+            v-model="queryParams.career"
+            placeholder="请输入职业"
             clearable
             size="mini"
             @keyup.enter.native="handleQuery"
@@ -100,10 +77,10 @@
     <el-table
       :height="tableHeight"
       v-loading="loading"
-      :data="articleList"
+      :data="developerList"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="50" align="center" />
+      <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="#" type="index" width="50" align="center">
         <template scope="scope">
           <span>{{
@@ -111,50 +88,25 @@
           }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="类型"
-        align="center"
-        prop="articleType"
-        width="100"
-      >
+      <el-table-column label="名称" align="center" prop="name" width="160" />
+      <el-table-column label="头像" align="center" prop="avatar" width="100">
         <template slot-scope="scope">
-          <dict-tag
-            :options="dict.type.sys_article_type"
-            :value="scope.row.articleType"
-          />
+          <image-preview :src="scope.row.avatar" :width="30" :height="30" />
         </template>
       </el-table-column>
       <el-table-column
-        label="标题"
+        label="职业"
         align="center"
-        prop="smallTitle"
-        width="200"
+        prop="career"
+        width="120"
         :show-overflow-tooltip="true"
       />
       <el-table-column
-        label="简介"
+        label="描述"
         align="center"
-        prop="bigTitle"
+        prop="intro"
         :show-overflow-tooltip="true"
       />
-      <el-table-column label="封面图" align="center" prop="faceUrl" width="100">
-        <template slot-scope="scope">
-          <image-preview :src="scope.row.faceUrl" :width="30" :height="30" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="来源"
-        align="center"
-        prop="articleSource"
-        width="100"
-      >
-        <template slot-scope="scope">
-          <dict-tag
-            :options="dict.type.sys_article_source"
-            :value="scope.row.articleSource"
-          />
-        </template>
-      </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" width="100" />
       <el-table-column
         label="操作"
@@ -168,7 +120,7 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:article:edit']"
+            v-hasPermi="['system:developer:edit']"
             >修改</el-button
           >
           <el-button
@@ -176,7 +128,7 @@
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system:article:remove']"
+            v-hasPermi="['system:developer:remove']"
             >删除</el-button
           >
         </template>
@@ -191,62 +143,31 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改内容管理对话框 -->
+    <!-- 添加或修改成员管理对话框 -->
     <el-dialog
       :title="title"
       :visible.sync="open"
-      width="1000px"
+      width="800px"
       append-to-body
       :close-on-click-modal="false"
       v-dialogDrag
     >
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="类型" prop="articleType">
-          <el-select
-            v-model="form.articleType"
-            placeholder="请选择类型"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="dict in dict.type.sys_article_type"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
-          </el-select>
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入名称" />
         </el-form-item>
-        <el-form-item label="标题" prop="smallTitle">
-          <el-input v-model="form.smallTitle" placeholder="请输入标题" />
+        <el-form-item label="头像" prop="avatar">
+          <image-upload v-model="form.avatar" />
         </el-form-item>
-        <el-form-item label="简介" prop="bigTitle">
+        <el-form-item label="职业" prop="career">
+          <el-input v-model="form.career" placeholder="请输入职业" />
+        </el-form-item>
+        <el-form-item label="描述" prop="intro">
           <el-input
-            v-model="form.bigTitle"
+            v-model="form.intro"
             type="textarea"
-            placeholder="请输入简介"
+            placeholder="请输入内容"
           />
-        </el-form-item>
-        <el-form-item label="封面图" prop="faceUrl">
-          <image-upload v-model="form.faceUrl" :limit="1" />
-        </el-form-item>
-        <el-form-item label="内容">
-          <editor v-model="form.articleContent" :min-height="192" />
-        </el-form-item>
-        <el-form-item label="来源" prop="articleSource">
-          <el-select
-            v-model="form.articleSource"
-            placeholder="请选择来源"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="dict in dict.type.sys_article_source"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="热度值" prop="sortNo">
-          <el-input v-model="form.sortNo" placeholder="请输入热度值" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" placeholder="请输入备注" />
@@ -262,22 +183,21 @@
 
 <script>
 import {
-  listArticle,
-  getArticle,
-  delArticle,
-  addArticle,
-  updateArticle,
-} from "@/api/system/article";
+  listDeveloper,
+  getDeveloper,
+  delDeveloper,
+  addDeveloper,
+  updateDeveloper,
+} from "@/api/system/developer";
 
 export default {
-  name: "Article",
-  dicts: ["sys_article_type", "sys_article_source"],
+  name: "Developer",
   data() {
     return {
       // 表格高度
       tableHeight: document.documentElement.clientHeight - 180,
       // 遮罩层
-      loading: true,
+      loading: false,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -288,8 +208,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 内容管理表格数据
-      articleList: [],
+      // 成员管理表格数据
+      developerList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -298,22 +218,21 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 20,
-        orderByColumn: "sort_no desc,create_time",
+        orderByColumn: "create_time",
         isAsc: "desc",
-        articleType: null,
-        smallTitle: null,
+        name: null,
+        avatar: null,
+        career: null,
+        intro: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        articleType: [
-          { required: true, message: "类型不能为空", trigger: "change" },
-        ],
-        smallTitle: [
-          { required: true, message: "标题不能为空", trigger: "blur" },
-        ],
-        faceUrl: [{ required: true, message: "封面不能为空", trigger: "blur" }],
+        name: [{ required: true, message: "名称不能为空", trigger: "blur" }],
+        avatar: [{ required: true, message: "头像不能为空", trigger: "blur" }],
+        career: [{ required: true, message: "职业不能为空", trigger: "blur" }],
+        intro: [{ required: true, message: "描述不能为空", trigger: "blur" }],
       },
     };
   },
@@ -321,11 +240,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询内容管理列表 */
+    /** 查询成员管理列表 */
     getList() {
       this.loading = true;
-      listArticle(this.queryParams).then((response) => {
-        this.articleList = response.rows;
+      listDeveloper(this.queryParams).then((response) => {
+        this.developerList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -339,14 +258,10 @@ export default {
     reset() {
       this.form = {
         id: null,
-        articleType: null,
-        smallTitle: null,
-        bigTitle: null,
-        faceUrl: null,
-        faceThum: null,
-        articleContent: null,
-        articleSource: null,
-        sortNo: null,
+        name: null,
+        avatar: null,
+        career: null,
+        intro: null,
         createTime: null,
         createBy: null,
         updateTime: null,
@@ -375,16 +290,16 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加文章";
+      this.title = "添加成员";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids;
-      getArticle(id).then((response) => {
+      getDeveloper(id).then((response) => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改文章";
+        this.title = "修改成员";
       });
     },
     /** 提交按钮 */
@@ -392,13 +307,13 @@ export default {
       this.$refs["form"].validate((valid) => {
         if (valid) {
           if (this.form.id != null) {
-            updateArticle(this.form).then((response) => {
+            updateDeveloper(this.form).then((response) => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addArticle(this.form).then((response) => {
+            addDeveloper(this.form).then((response) => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -413,23 +328,13 @@ export default {
       this.$modal
         .confirm("是否确认删除记录？")
         .then(function () {
-          return delArticle(ids);
+          return delDeveloper(ids);
         })
         .then(() => {
           this.getList();
           this.$modal.msgSuccess("删除成功");
         })
         .catch(() => {});
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download(
-        "system/article/export",
-        {
-          ...this.queryParams,
-        },
-        `article_${new Date().getTime()}.xlsx`
-      );
     },
   },
 };

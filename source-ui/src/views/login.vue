@@ -1,33 +1,13 @@
 <template>
   <div class="login">
     <div class="login-logo hidden-md-and-down">
-      <span> 开源字节 | 通行证</span>
+      <span> XX公司 | 通行证</span>
     </div>
-    <h2 class="main-title"><span>开源字节</span></h2>
+    <h2 class="main-title"><span>公司管理系统</span></h2>
     <h3 class="sub-title">用心打造完美系统， 推动企业智能化</h3>
     <div class="login-box">
-      <div class="weixin" v-show="loginType === 0">
-        <div class="title">微信扫码登录</div>
-        <div class="login-switch" @click="changeLoginType(1)">
-          <div class="static-img">
-            <img src="../assets/images/电脑登录.png" alt="密码登录" />
-          </div>
-        </div>
-        <!-- 公众号图片 -->
-        <div class="open-weixin">
-          <img :src="wxQrcode" alt="密码登录" />
-          <div class="info">
-            <p>微信扫码关注公众号后自动登录</p>
-          </div>
-        </div>
-      </div>
       <div class="pc" v-show="loginType === 1">
         <div class="title">密码登录</div>
-        <div class="login-switch" @click="changeLoginType(0)">
-          <div class="static-img">
-            <img src="../assets/images/二维码.png" alt="微信扫码登录" />
-          </div>
-        </div>
         <el-form
           ref="loginForm"
           :model="loginForm"
@@ -110,8 +90,8 @@
     <!--  底部  -->
     <div class="el-login-footer">
       <span>
-        <a href="https://sourcebyte.vip" target="_blank"
-          >Copyright © 2021-{{ new Date().getFullYear() }} 开源字节 Open Source
+        <a href="https://blog.csdn.net/m0_61160520?spm=1000.2115.3001.5343" target="_blank"
+          >Copyright © 2021-{{ new Date().getFullYear() }} 兴 Open Source
           Byte All Rights Reserved.</a
         >
       </span>
@@ -132,18 +112,13 @@ export default {
   name: "Login",
   data() {
     return {
-      loginType: 0,
-      wxQrcode: "https://sourcebyte.vip/profile/customer/file/wx-gzh.jpg",
-      // wsuri: "ws://127.0.0.1:8088/websocket/message",
-      wsuri: "wss://sourcebyte.vip/web-api/websocket/message",
-      ws: null,
+      loginType: 1,
       codeUrl: "",
       loginForm: {
         username: "demo",
         password: "123456",
-        rememberMe: false,
+        rememberMe: true,
         code: "",
-        uuid: "",
       },
       loginRules: {
         username: [
@@ -156,7 +131,7 @@ export default {
       },
       loading: false,
       // 验证码开关
-      captchaOnOff: true,
+      captchaOnOff: false,
       // 注册开关
       register: false,
       redirect: undefined,
@@ -173,29 +148,6 @@ export default {
   async created() {
     this.getCode();
     this.getCookie();
-    if (!this.ws) {
-      this.ws = new WebSocket(this.wsuri);
-    }
-    await new Promise((resolve) => {
-      this.ws.onopen = () => {
-        console.log("已经打开连接!");
-        resolve(); // 等待连接成功 再发送消息并执行后续代码
-      };
-    });
-    let _this = this;
-    this.ws.onmessage = function (event) {
-      // 获取后台返回的信息
-      let subscribe = event.data;
-      if (subscribe == 1) {
-        // 关注了，则跳转到首页
-        // Notification.warning("请使用密码登录");
-        _this.qrCodeLogin();
-      } else if (subscribe == 0) {
-        Notification.success("分享是一种美德，请点赞关注支持");
-      }
-    };
-    // 获取wx码
-    this.getWxCode();
   },
   methods: {
     getCode() {
@@ -253,71 +205,6 @@ export default {
     changeLoginType(type) {
       this.loginType = type;
     },
-    getWxCode() {
-      // 先获取token
-      request({
-        url: "/api/cmsWxApi/getAccessToken",
-        headers: {
-          isToken: false,
-        },
-      }).then((res1) => {
-        // 2000次调用上限
-        let access_token = res1;
-        let data = {
-          expire_seconds: 604800,
-          action_name: "QR_SCENE",
-          action_info: { scene: { scene_id: 123 } },
-        };
-        // 再获取票据
-        axios
-          .post(
-            "/wx-api/cgi-bin/qrcode/create?access_token=" + access_token,
-            data
-          )
-          .then((res2) => {
-            let ticket = res2.data.ticket;
-            //设置连接（session）与ticket对应关系
-            if (this.ws) {
-              this.ws.send(ticket);
-            } else {
-              Message({
-                message: "未连接到服务器",
-                type: "error",
-              });
-            }
-            axios({
-              method: "get",
-              url: "/mp-api/cgi-bin/showqrcode?ticket=" + ticket,
-              responseType: "arraybuffer",
-            })
-              .then((res3) => {
-                // base64图片处理
-                return (
-                  "data:image/png;base64," +
-                  btoa(
-                    new Uint8Array(res3.data).reduce(
-                      (data, byte) => data + String.fromCharCode(byte),
-                      ""
-                    )
-                  )
-                );
-              })
-              .then((data) => {
-                this.wxQrcode = data;
-              });
-          });
-      });
-    },
-    qrCodeLogin() {
-      this.$store
-        .dispatch("qrCodeLogin", {})
-        .then(() => {
-          this.$router.push({ path: this.redirect || "/" }).catch(() => {});
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
   },
 };
 </script>
@@ -325,7 +212,6 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 .login {
   display: flex;
-  // justify-content: center;
   align-items: center;
   flex-direction: column;
   height: 100%;
@@ -392,9 +278,7 @@ export default {
   position: relative;
   margin: 0 auto;
   padding: 30px 0 0 0;
-  -webkit-box-shadow: 0px 1px 12px 0px rgba(0, 0, 0, 0.2);
   box-shadow: 0px 1px 12px 0px rgba(0, 0, 0, 0.2);
-  .weixin,
   .pc {
     .title {
       padding-left: 30px;
@@ -410,21 +294,6 @@ export default {
         width: 53px;
         height: 53px;
         display: block;
-      }
-    }
-    .open-weixin {
-      margin: 0 auto;
-      padding: 30px;
-      text-align: center;
-      img {
-        width: 200px;
-        border: 1px solid transparent;
-      }
-      .info {
-        margin: 0 auto;
-        font-size: 13px;
-        color: #999999;
-        text-align: center;
       }
     }
   }

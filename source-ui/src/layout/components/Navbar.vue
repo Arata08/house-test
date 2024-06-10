@@ -18,6 +18,12 @@
       <template v-if="device !== 'mobile'">
         <search id="header-search" class="right-menu-item" />
 
+        <el-tooltip content="思创OA" effect="dark" placement="bottom">
+          <div class="right-menu-item hover-effect" @click="gotoOa">
+            <svg-icon icon-class="guide" />
+          </div>
+        </el-tooltip>
+
         <el-tooltip content="驾驶舱" effect="dark" placement="bottom">
           <div class="right-menu-item hover-effect" @click="goto">
             <svg-icon icon-class="bigScreen" />
@@ -42,6 +48,7 @@
       <el-dropdown
         class="avatar-container right-menu-item hover-effect"
         trigger="hover"
+        size="medium"
       >
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar" />
@@ -123,6 +130,9 @@ export default {
     },
     goto() {
       window.open("http://csm.sourcebyte.vip/");
+    },
+    gotoOa() {
+      window.open("https://oa.sourcebyte.vip/");
     },
   },
 };
