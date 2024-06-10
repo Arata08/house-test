@@ -1,9 +1,9 @@
 <template>
   <div class="login">
     <div class="login-logo hidden-md-and-down">
-      <span> XX公司 | 通行证</span>
+      <span> 丽丽租好房</span>
     </div>
-    <h2 class="main-title"><span>公司管理系统</span></h2>
+    <h2 class="main-title"><span>丽丽租好房管理系统</span></h2>
     <h3 class="sub-title">用心打造完美系统， 推动企业智能化</h3>
     <div class="login-box">
       <div class="pc" v-show="loginType === 1">
