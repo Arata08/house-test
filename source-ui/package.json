@@ -80,8 +80,9 @@
     "vue-template-compiler": "2.6.12"
   },
   "engines": {
-    "node": ">=8.9",
-    "npm": ">= 3.0.0"
+    "node": "18.20.3",
+    "npm": "10.7.0"
+
   },
   "browserslist": [
     "> 1%",
